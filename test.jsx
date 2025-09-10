@@ -91,3 +91,31 @@ const [upgradeComment, setUpgradeComment] = useState('');
     onDiscard={() => handleApproveReject(false)}
   />
 )}
+
+
+
+const handleUpgradeFileSelect = (file) => {
+  setUpgradeFiles(prev => [...prev, file]);
+};
+
+const uploadUpgradeFiles = async (taskName) => {
+  for (const file of upgradeFiles) {
+    const base64 = await convertToBase64(file);
+    await api.post('/task/upload', {
+      file: base64,
+      filename: file.name,
+      filetype: file.type,
+      taskName,
+      user_email: localStorage.getItem("emailToken") || "NA",
+      user_name: localStorage.getItem("Data_API_name") || "NA",
+      persona: localStorage.getItem("user_persona") || "NA",
+      role: localStorage.getItem("user_role") || "NA",
+      user_source_persona: localStorage.getItem("user_source_persona") || "NA",
+      user_vertical: localStorage.getItem("Data_API_vertical") || "NA",
+      user_department: localStorage.getItem("Data_API_department_code") || "NA",
+      user_division: localStorage.getItem("Data_API_division_code") || "NA",
+      pageName,
+    });
+  }
+};
+
