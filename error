@@ -1,64 +1,15 @@
-🔹 Example with one generic SET_COUNTERS action
-const initialState = {
-  counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
-  counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
-};
+  const userProDetails = async (email) => {
+    console.log(email, 'check');
 
-const counterReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "INCREMENT_AI_REPORT": {
-      const newValue = state.counterAiReport + 1;
-      localStorage.setItem("counterAiReport", newValue);
-      return { ...state, counterAiReport: newValue };
+    const  data  = await getProDetails.get({
+      email: email.toLowerCase()
+    });
+    if (data && data != null) {
+      setCurrentPlan(data.plan);
+      setPlanStatus(data.plan_status);
+      dispatch(setCounters(data.counter_ai_report, data.counter_interactions));
+      console.log(data,'pppp');
+
     }
-
-    case "INCREMENT_API_INTERACTION": {
-      const newValue = state.counterApiInteraction + 1;
-      localStorage.setItem("counterApiInteraction", newValue);
-      return { ...state, counterApiInteraction: newValue };
-    }
-
-    case "SET_COUNTERS": {
-      const { counterAiReport, counterApiInteraction } = action.payload;
-
-      // keep localStorage in sync
-      localStorage.setItem("counterAiReport", counterAiReport);
-      localStorage.setItem("counterApiInteraction", counterApiInteraction);
-
-      return {
-        ...state,
-        counterAiReport,
-        counterApiInteraction,
-      };
-    }
-
-    default:
-      return state;
+    console.log(data);
   }
-};
-
-export default counterReducer;
-
-🔹 Action creator
-export const setCounters = (counterAiReport, counterApiInteraction) => ({
-  type: "SET_COUNTERS",
-  payload: { counterAiReport, counterApiInteraction },
-});
-
-🔹 Usage after API call
-import { useDispatch } from "react-redux";
-import { setCounters } from "../actions/counter.actions";
-
-const MyComponent = () => {
-  const dispatch = useDispatch();
-
-  const fetchCounters = async () => {
-    const res = await fetch("/api/get-counters");
-    const data = await res.json();
-
-    // Suppose API returns { aiReport: 5, apiInteraction: 12 }
-    dispatch(setCounters(data.aiReport, data.apiInteraction));
-  };
-
-  return <button onClick={fetchCounters}>Sync Counters</button>;
-};
