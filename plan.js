@@ -34,3 +34,27 @@ export const plans = [
         },
     },
 ];
+
+
+
+
+const currentPlan = localStorage.getItem("currentPlan") || "LITE";
+const activePlan = plans.find(p => p.name === currentPlan) || plans[0];
+
+// Extract numeric limits
+const reportLimit = activePlan.features.reportGen === "Unlimited" 
+  ? Infinity 
+  : parseInt(activePlan.features.reportGen);
+
+const apiLimit = activePlan.features.apiHits === "Unlimited" 
+  ? Infinity 
+  : parseInt(activePlan.features.apiHits);
+
+
+
+{planStatus === "NA" &&
+  counterAiReport >= reportLimit &&
+  counterApiInteraction >= apiLimit && (
+    <ProFeature />
+)}
+
