@@ -2,3 +2,35 @@ const handleBeforeUnload = () => {
   const data = JSON.stringify({ user: "abc", action: "tab-close" });
   navigator.sendBeacon("/api/cleanup", data);
 };
+
+
+import { useEffect } from "react";
+import axios from "axios";
+
+function App() {
+  useEffect(() => {
+    const handleBeforeUnload = async (event) => {
+      // optional: show confirmation dialog
+      // event.preventDefault();
+      // event.returnValue = "";
+
+      try {
+        await fetch("/api/cleanup", { method: "POST" });
+        // OR with axios
+        // await axios.post("/api/cleanup");
+      } catch (err) {
+        console.error("Cleanup API failed", err);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  return <div>Your App</div>;
+}
+
+export default App;
