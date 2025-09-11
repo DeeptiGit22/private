@@ -1,15 +1,271 @@
+const initialState = {
+  counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
+  counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
+};
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT_AI_REPORT": {
+      const newValue = state.counterAiReport + 1;
+      localStorage.setItem("counterAiReport", newValue);
+      return { ...state, counterAiReport: newValue };
+    }
+
+    case "INCREMENT_API_INTERACTION": {
+      const newValue = state.counterApiInteraction + 1;
+      localStorage.setItem("counterApiInteraction", newValue);
+      return { ...state, counterApiInteraction: newValue };
+    }
+
+    case "SET_COUNTERS": {
+      const { counterAiReport, counterApiInteraction } = action.payload;
+      // keep localStorage in sync
+      localStorage.setItem("counterAiReport", counterAiReport);
+      localStorage.setItem("counterApiInteraction", counterApiInteraction);
+
+      return {
+        ...state,
+        counterAiReport,
+        counterApiInteraction,
+      };
+    }
+
+    default:
+      return state;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useState, useEffect } from "react";
+import { Route, Routes, BrowserRouter as Router, Navigate } from "react-router-dom";
+import { Summary2 } from "./app/components/Summary2/summary2";
+import { Dashboard } from "./app/components/Dashboard/Dashboard";
+// import Summary3 from "./app/components/Summary3";
+import { Box } from "@mui/material";
+import NavigationBar from "../src/app/components/MainLayout/NavigationBar";
+import { AppBar } from "@mui/material";
+import Header from "./app/components/Header/Header";
+import { useDispatch, useSelector } from "react-redux";
+import Auth from "./app/components/LandingPage/Auth";
+import SumamryAction from "./app/components/summary-action";
+import AskMeAything from "./app/components/AskMeAnythingV2";
+import CommentsTable from "./app/components/CommentTable/ChatbotComments";
+import { TopMentionComments } from "./app/components/TopMentionComments/topMentionComments";
+import MyView from "./app/components/MyView/MyView";
+import NewsMain from './app/components/News/NewsMain'
+import NotFound from "./app/components/NotFound/NotFound";
+import NotAuthorized from "./app/components/NotAuthorized/NotAuthorized";
+import { DataReport } from "./app/components/DataReport/DataReport";
+import MessageModal from "./app/components/ProFeature/MessageModal";
+import reqPending from './assets/images/req-pending.png'
+import reqSubmitted from './assets/images/req-submitted.png'
+import reqApproved from './assets/images/req-approved.png'
+
+import ProFeature from "./app/components/ProFeature/ProFeature";
+import PricingModal from "./app/components/ProFeature/PricingModal";
+import UpgradeRequestForm from "./app/components/ProFeature/UpgradeRequestForm";
+import { plans } from "./app/core/configs/plans";
+import { getProDetails } from "./app/core/apis/SummaryOneAPI";
+import { setCounters } from "./app/core/actions/couter.action";
+
+const Routing = () => {
+  const dispatch = useDispatch();
+  const show = useSelector((state) => state.themeState.showNav);
+  const ThemeState = useSelector((state) => state.themeState.theme);
+  const { counterAiReport, counterApiInteraction } = useSelector((state) => state.counterState);
+  const [planStatus, setPlanStatus] = useState('NA');
+  const [showMessage, setShowMessage] = useState(true);
+  // const currentPlan = localStorage.getItem("plan") || "Lite";
+  const [currentPlan, setCurrentPlan] = useState('Lite');
+  const activePlan = plans.find(p => p.name === currentPlan) || plans[0];
+  const userMail = localStorage.getItem('userMail') || '';
+
+  const reportLimit = activePlan.features.reportGen === "Unlimited"
+    ? Infinity
+    : parseInt(activePlan.features.reportGen);
+
+  const apiLimit = activePlan.features.apiHits === "Unlimited"
+    ? Infinity
+    : parseInt(activePlan.features.apiHits);
+
+  console.log(reportLimit, apiLimit)
+
   const userProDetails = async (email) => {
     console.log(email, 'check');
 
-    const  data  = await getProDetails.get({
+    const  result  = await getProDetails.get({
       email: email.toLowerCase()
     });
-    if (data && data != null) {
-      setCurrentPlan(data.plan);
-      setPlanStatus(data.plan_status);
-      dispatch(setCounters(data.counter_ai_report, data.counter_interactions));
-      console.log(data,'pppp');
-
+    const res = result.data;
+    if (res && res.data) {
+      setCurrentPlan(res.plan);
+      setPlanStatus(res.plan_status);
+      dispatch(setCounters(res.counter_ai_report, res.counter_interactions));
+      console.log(res,'pppp');
     }
-    console.log(data);
+    console.log(res);
   }
+  // const updateUserProDetails = async () => {
+  //   const obj = {
+  //     email: 'ey_santoshkumar.jena@maruti.co.in',
+  //     plan: 'Pro',
+  //     plan_status: 'pending',
+  //     counter_ai_report: 1,
+  //     counter_interactions: 2,
+  //     rejection_remark: ''
+  //   }
+
+  //   const { data } = await getProDetails.put(obj);
+  //   console.log(data);
+  // }
+
+  useEffect(() => {
+    // localStorage.setItem('counterAiReport', 0);
+    // localStorage.setItem('planStatus', 'NA')
+    // setPlanStatus(localStorage.getItem('planStatus'))
+    // localStorage.setItem('plan', 'Pro');
+    // localStorage.setItem('rejectResponse','Justification is not clear')
+    userProDetails(userMail);
+
+    // updateUserProDetails();
+  }, [])
+
+  // useEffect(() => {
+  //   const handleBeforeUnload = async (event) => {
+  //     try {
+  //      updateUserProDetails();
+  //     } catch (err) {
+  //       console.error("Cleanup API failed", err);
+  //     }
+  //   };
+
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
+
+
+
+
+  return (
+    <Box>
+      <Box sx={{ display: "flex", position: "relative", }}>
+        {planStatus === 'NA' ? (counterAiReport >= reportLimit &&
+          counterApiInteraction >= apiLimit && <ProFeature />)
+          /* {planStatus === 'NA' ? ((counterAiReport && counterAiReport === 1) && <ProFeature />) */
+
+          : (planStatus === 'pending') ?
+
+            <MessageModal
+              imgSrc={reqPending}
+              title="Subscription Upgrade Lite to Pro Approval pending"
+              description="Good things take time: Your Upgrade request is under review."
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "10px",
+                  marginTop: "20px",
+                  width: "100%",
+                }}
+              >
+                <button
+                  style={{
+                    padding: "8px 16px",
+                    width: "100%",
+                    backgroundColor: "#484848",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </MessageModal> :
+            (planStatus === 'approved') ? showMessage &&
+              <MessageModal
+                imgSrc={reqApproved}
+                title="Subscription Upgrade Lite to Pro Request approved"
+                description="You’ve Activated Pro. Rise and Go!!"
+                showClose={true}
+                onClose={() => setShowMessage(false)}
+              />
+              : (planStatus === 'rejected') ?
+                <ProFeature mode={'rejected'} /> : ''}
+
+
+
+
+        <Router>
+          {/* <Auth> */}
+
+          <NavigationBar />
+          {/* {
+              <AppBar
+                position="fixed"
+                sx={
+                  !show
+                    ? { boxShadow: 0, zIndex: 1, width: "95%", left: "5%" }
+                    : { boxShadow: 0, zIndex: 1, width: "85%", left: "13%" }
+                }
+              >
+                <Header propstate="route1" />
+              </AppBar>
+            } */}
+
+          <Box sx={{
+            marginLeft: "5%", width: "100%", overflowY: "auto",
+            backgroundColor: `${ThemeState === "dark" ? "#1B1E23" : "#F8F8F8"}`
+          }}>
+            <AppBar
+              position="fixed"
+              sx={{ boxShadow: 0, zIndex: 1, width: "95%", left: "5%" }}
+            >
+              <Header propstate="route1" />
+            </AppBar>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/whats_new" element={<NewsMain />} />
+              <Route path="/pulse" element={<Dashboard />} />
+              <Route path="/chatbot_data" element={<CommentsTable />} />
+              <Route path="/comments" element={<TopMentionComments />} />
+              <Route path="/report" element={<DataReport />} />
+              <Route path="/benchmarking" element={
+                <Summary2 />
+              } />
+              <Route path="/ai_report" element={
+                <SumamryAction />
+              } />
+              <Route path="/myview" element={
+                <MyView />
+              } />
+              <Route path="/not_authorized" element={<NotAuthorized />} />
+              <Route path="/*" element={<NotFound />} />
+            </Routes>
+            {<AskMeAything />}
+          </Box>
+          {/* </Auth> */}
+        </Router>
+      </Box>
+    </Box>
+  );
+};
+export default Routing;
+
+export default counterReducer
