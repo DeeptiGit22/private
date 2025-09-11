@@ -1,36 +1,25 @@
-const handleBeforeUnload = () => {
-  const data = JSON.stringify({ user: "abc", action: "tab-close" });
-  navigator.sendBeacon("/api/cleanup", data);
+const initialState = {
+  counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
+  counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
 };
 
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT_AI_REPORT": {
+      const newValue = state.counterAiReport + 1;
+      localStorage.setItem("counterAiReport", newValue);
+      return { ...state, counterAiReport: newValue };
+    }
 
-import { useEffect } from "react";
-import axios from "axios";
+    case "INCREMENT_API_INTERACTION": {
+      const newValue = state.counterApiInteraction + 1;
+      localStorage.setItem("counterApiInteraction", newValue);
+      return { ...state, counterApiInteraction: newValue };
+    }
 
-function App() {
-  useEffect(() => {
-    const handleBeforeUnload = async (event) => {
-      // optional: show confirmation dialog
-      // event.preventDefault();
-      // event.returnValue = "";
+    default:
+      return state;
+  }
+};
 
-      try {
-        await fetch("/api/cleanup", { method: "POST" });
-        // OR with axios
-        // await axios.post("/api/cleanup");
-      } catch (err) {
-        console.error("Cleanup API failed", err);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, []);
-
-  return <div>Your App</div>;
-}
-
-export default App;
+export default counterReducer
