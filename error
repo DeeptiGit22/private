@@ -1,3 +1,4 @@
+🔹 Example with one generic SET_COUNTERS action
 const initialState = {
   counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
   counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
@@ -17,9 +18,47 @@ const counterReducer = (state = initialState, action) => {
       return { ...state, counterApiInteraction: newValue };
     }
 
+    case "SET_COUNTERS": {
+      const { counterAiReport, counterApiInteraction } = action.payload;
+
+      // keep localStorage in sync
+      localStorage.setItem("counterAiReport", counterAiReport);
+      localStorage.setItem("counterApiInteraction", counterApiInteraction);
+
+      return {
+        ...state,
+        counterAiReport,
+        counterApiInteraction,
+      };
+    }
+
     default:
       return state;
   }
 };
 
-export default counterReducer
+export default counterReducer;
+
+🔹 Action creator
+export const setCounters = (counterAiReport, counterApiInteraction) => ({
+  type: "SET_COUNTERS",
+  payload: { counterAiReport, counterApiInteraction },
+});
+
+🔹 Usage after API call
+import { useDispatch } from "react-redux";
+import { setCounters } from "../actions/counter.actions";
+
+const MyComponent = () => {
+  const dispatch = useDispatch();
+
+  const fetchCounters = async () => {
+    const res = await fetch("/api/get-counters");
+    const data = await res.json();
+
+    // Suppose API returns { aiReport: 5, apiInteraction: 12 }
+    dispatch(setCounters(data.aiReport, data.apiInteraction));
+  };
+
+  return <button onClick={fetchCounters}>Sync Counters</button>;
+};
