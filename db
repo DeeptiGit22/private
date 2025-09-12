@@ -1,56 +1,75 @@
-import { getProDetails } from "../apis/SummaryOneAPI";
-
+Fixed version (Pure reducer + side effects in actions)
+// counterReducer.js
 const initialState = {
-  counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
-  counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
+  counterAiReport: Number(localStorage.getItem("counterAiReport")) || 0,
+  counterApiInteraction: Number(localStorage.getItem("counterApiInteraction")) || 0,
 };
-
-const updateUserProDetails = async (obj) => {
-
-  const { data } = await getProDetails.put(obj);
-  console.log(data);
-}
 
 const counterReducer = (state = initialState, action) => {
   switch (action.type) {
-    case "INCREMENT_AI_REPORT": {
-      const newValue = state.counterAiReport + 1;
-      const payload = {
-        counter_ai_report: newValue,
-      }
-
-      localStorage.setItem("counterAiReport", newValue);
-      updateUserProDetails(payload)
-      return { ...state, counterAiReport: newValue };
-    }
-
-    case "INCREMENT_API_INTERACTION": {
-      const newValue = state.counterApiInteraction + 1;
-      localStorage.setItem("counterApiInteraction", newValue);
-      const payload = {
-        counter_interactions: newValue,
-      }
-      updateUserProDetails(payload)
-
-      return { ...state, counterApiInteraction: newValue };
-    }
-
-    case "SET_COUNTERS": {
-      const { counterAiReport, counterApiInteraction } = action.payload;
-      // keep localStorage in sync
-      localStorage.setItem("counterAiReport", counterAiReport);
-      localStorage.setItem("counterApiInteraction", counterApiInteraction);
-
+    case "INCREMENT_AI_REPORT":
       return {
         ...state,
-        counterAiReport,
-        counterApiInteraction,
+        counterAiReport: state.counterAiReport + 1,
       };
-    }
+
+    case "INCREMENT_API_INTERACTION":
+      return {
+        ...state,
+        counterApiInteraction: state.counterApiInteraction + 1,
+      };
+
+    case "SET_COUNTERS":
+      return {
+        ...state,
+        counterAiReport: action.payload.counterAiReport,
+        counterApiInteraction: action.payload.counterApiInteraction,
+      };
 
     default:
       return state;
   }
 };
 
-export default counterReducer
+export default counterReducer;
+
+✅ Move side effects into action creators
+import { getProDetails } from "../apis/SummaryOneAPI";
+
+// helper to update server
+const updateUserProDetails = async (obj) => {
+  try {
+    const { data } = await getProDetails.put(obj);
+    console.log("Updated:", data);
+  } catch (err) {
+    console.error("Update failed", err);
+  }
+};
+
+export const incrementAiReport = () => (dispatch, getState) => {
+  const newValue = getState().counter.counterAiReport + 1;
+
+  // update localStorage
+  localStorage.setItem("counterAiReport", newValue);
+
+  // update API
+  updateUserProDetails({ counter_ai_report: newValue });
+
+  dispatch({ type: "INCREMENT_AI_REPORT" });
+};
+
+export const incrementApiInteraction = () => (dispatch, getState) => {
+  const newValue = getState().counter.counterApiInteraction + 1;
+
+  localStorage.setItem("counterApiInteraction", newValue);
+  updateUserProDetails({ counter_interactions: newValue });
+
+  dispatch({ type: "INCREMENT_API_INTERACTION" });
+};
+
+export const setCounters = (payload) => (dispatch) => {
+  localStorage.setItem("counterAiReport", payload.counterAiReport);
+  localStorage.setItem("counterApiInteraction", payload.counterApiInteraction);
+
+  dispatch({ type: "SET_COUNTERS", payload });
+};
