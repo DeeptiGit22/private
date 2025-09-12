@@ -1,13 +1,4 @@
-export const incrementAiReport = () => ({ type: "INCREMENT_AI_REPORT" }); 
-export const incrementApiInteraction = () => ({ type: "INCREMENT_API_INTERACTION" });
-export const setCounters = (counterAiReport, counterApiInteraction) => ({
-    type: "SET_COUNTERS",
-    payload: { counterAiReport, counterApiInteraction },
-  });
-
-
-
-  import { getProDetails } from "../apis/SummaryOneAPI";
+import { getProDetails } from "../apis/SummaryOneAPI";
 
 // helper to update server
 const updateUserProDetails = async (obj) => {
@@ -19,6 +10,7 @@ const updateUserProDetails = async (obj) => {
   }
 };
 
+// thunk action creators (no args needed when dispatching)
 export const incrementAiReport = () => (dispatch, getState) => {
   const newValue = getState().counter.counterAiReport + 1;
 
@@ -28,7 +20,14 @@ export const incrementAiReport = () => (dispatch, getState) => {
   // update API
   updateUserProDetails({ counter_ai_report: newValue });
 
-  dispatch({ type: "INCREMENT_AI_REPORT" });
+  // dispatch pure action
+  dispatch({
+    type: "SET_COUNTERS",
+    payload: {
+      counterAiReport: newValue,
+      counterApiInteraction: getState().counter.counterApiInteraction,
+    },
+  });
 };
 
 export const incrementApiInteraction = () => (dispatch, getState) => {
@@ -37,12 +36,22 @@ export const incrementApiInteraction = () => (dispatch, getState) => {
   localStorage.setItem("counterApiInteraction", newValue);
   updateUserProDetails({ counter_interactions: newValue });
 
-  dispatch({ type: "INCREMENT_API_INTERACTION" });
+  dispatch({
+    type: "SET_COUNTERS",
+    payload: {
+      counterAiReport: getState().counter.counterAiReport,
+      counterApiInteraction: newValue,
+    },
+  });
 };
 
-export const setCounters = (payload) => (dispatch) => {
-  localStorage.setItem("counterAiReport", payload.counterAiReport);
-  localStorage.setItem("counterApiInteraction", payload.counterApiInteraction);
+// set counters directly (still no args when dispatching unless you pass values)
+export const setCounters = () => (dispatch) => {
+  const counterAiReport = Number(localStorage.getItem("counterAiReport")) || 0;
+  const counterApiInteraction = Number(localStorage.getItem("counterApiInteraction")) || 0;
 
-  dispatch({ type: "SET_COUNTERS", payload });
+  dispatch({
+    type: "SET_COUNTERS",
+    payload: { counterAiReport, counterApiInteraction },
+  });
 };
