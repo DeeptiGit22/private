@@ -1,40 +1,13 @@
-Fixed version (Pure reducer + side effects in actions)
-// counterReducer.js
-const initialState = {
-  counterAiReport: Number(localStorage.getItem("counterAiReport")) || 0,
-  counterApiInteraction: Number(localStorage.getItem("counterApiInteraction")) || 0,
-};
+export const incrementAiReport = () => ({ type: "INCREMENT_AI_REPORT" }); 
+export const incrementApiInteraction = () => ({ type: "INCREMENT_API_INTERACTION" });
+export const setCounters = (counterAiReport, counterApiInteraction) => ({
+    type: "SET_COUNTERS",
+    payload: { counterAiReport, counterApiInteraction },
+  });
 
-const counterReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case "INCREMENT_AI_REPORT":
-      return {
-        ...state,
-        counterAiReport: state.counterAiReport + 1,
-      };
 
-    case "INCREMENT_API_INTERACTION":
-      return {
-        ...state,
-        counterApiInteraction: state.counterApiInteraction + 1,
-      };
 
-    case "SET_COUNTERS":
-      return {
-        ...state,
-        counterAiReport: action.payload.counterAiReport,
-        counterApiInteraction: action.payload.counterApiInteraction,
-      };
-
-    default:
-      return state;
-  }
-};
-
-export default counterReducer;
-
-✅ Move side effects into action creators
-import { getProDetails } from "../apis/SummaryOneAPI";
+  import { getProDetails } from "../apis/SummaryOneAPI";
 
 // helper to update server
 const updateUserProDetails = async (obj) => {
