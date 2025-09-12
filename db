@@ -1,0 +1,5 @@
+INSERT INTO smart_zone.tbl_subscription_management (email)
+                SELECT %s
+                WHERE NOT EXISTS (
+                  SELECT 1 FROM smart_zone.tbl_subscription_management WHERE email = %s
+                )
