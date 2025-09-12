@@ -47,3 +47,43 @@ export const setCounters = () => {
     payload: { counterAiReport, counterApiInteraction },
   };
 };
+
+
+
+
+
+
+
+
+const initialState = {
+  counterAiReport: Number(localStorage.getItem("counterAiReport")) || 0,
+  counterApiInteraction: Number(localStorage.getItem("counterApiInteraction")) || 0,
+};
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT_AI_REPORT":
+      return {
+        ...state,
+        counterAiReport: state.counterAiReport + 1,
+      };
+
+    case "INCREMENT_API_INTERACTION":
+      return {
+        ...state,
+        counterApiInteraction: state.counterApiInteraction + 1,
+      };
+
+    case "SET_COUNTERS":
+      return {
+        ...state,
+        counterAiReport: action.payload.counterAiReport,
+        counterApiInteraction: action.payload.counterApiInteraction,
+      };
+
+    default:
+      return state;
+  }
+};
+
+export default counterReducer;
