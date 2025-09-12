@@ -1,5 +1,56 @@
-INSERT INTO smart_zone.tbl_subscription_management (email)
-                SELECT %s
-                WHERE NOT EXISTS (
-                  SELECT 1 FROM smart_zone.tbl_subscription_management WHERE email = %s
-                )
+import { getProDetails } from "../apis/SummaryOneAPI";
+
+const initialState = {
+  counterAiReport: parseInt(localStorage.getItem("counterAiReport")) || 0,
+  counterApiInteraction: parseInt(localStorage.getItem("counterApiInteraction")) || 0,
+};
+
+const updateUserProDetails = async (obj) => {
+
+  const { data } = await getProDetails.put(obj);
+  console.log(data);
+}
+
+const counterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "INCREMENT_AI_REPORT": {
+      const newValue = state.counterAiReport + 1;
+      const payload = {
+        counter_ai_report: newValue,
+      }
+
+      localStorage.setItem("counterAiReport", newValue);
+      updateUserProDetails(payload)
+      return { ...state, counterAiReport: newValue };
+    }
+
+    case "INCREMENT_API_INTERACTION": {
+      const newValue = state.counterApiInteraction + 1;
+      localStorage.setItem("counterApiInteraction", newValue);
+      const payload = {
+        counter_interactions: newValue,
+      }
+      updateUserProDetails(payload)
+
+      return { ...state, counterApiInteraction: newValue };
+    }
+
+    case "SET_COUNTERS": {
+      const { counterAiReport, counterApiInteraction } = action.payload;
+      // keep localStorage in sync
+      localStorage.setItem("counterAiReport", counterAiReport);
+      localStorage.setItem("counterApiInteraction", counterApiInteraction);
+
+      return {
+        ...state,
+        counterAiReport,
+        counterApiInteraction,
+      };
+    }
+
+    default:
+      return state;
+  }
+};
+
+export default counterReducer
