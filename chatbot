@@ -1,0 +1,38 @@
+import React, { useEffect, useState } from "react";
+
+const BotResult = () => {
+  const [points, setPoints] = useState([]);
+
+  useEffect(() => {
+    // Fetch and parse the uploaded bot_result.txt file (if served locally)
+    fetch("/bot_result.txt")
+      .then((res) => res.json())
+      .then((data) => {
+        // Parse the nested JSON inside body
+        const body = JSON.parse(data.body);
+        const result = body.result;
+
+        // Extract bullet points by splitting lines that start with "-"
+        const bullets = result
+          .split("\n")
+          .filter((line) => line.trim().startsWith("-"))
+          .map((line) => line.replace(/^-+\s*/, "")); // remove leading '-'
+
+        setPoints(bullets);
+      })
+      .catch((err) => console.error("Error parsing file:", err));
+  }, []);
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h3>Suzuki Swift – Best Features (Customer Feedback)</h3>
+      <ul>
+        {points.map((point, i) => (
+          <li key={i} dangerouslySetInnerHTML={{ __html: point }} />
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default BotResult;
