@@ -1,38 +1,134 @@
-import React, { useEffect, useState } from "react";
+const formatMessageWithBullets = (text) => {
+  const parts = text.split("**").filter(p => p.trim()); // split by **
 
-const BotResult = () => {
-  const [points, setPoints] = useState([]);
+  const items = [];
+  for (let i = 0; i < parts.length - 1; i += 2) {
+    const title = parts[i].trim();
+    const description = parts[i + 1].replace("-", "").trim();
+    items.push({ title, description });
+  }
 
-  useEffect(() => {
-    // Fetch and parse the uploaded bot_result.txt file (if served locally)
-    fetch("/bot_result.txt")
-      .then((res) => res.json())
-      .then((data) => {
-        // Parse the nested JSON inside body
-        const body = JSON.parse(data.body);
-        const result = body.result;
-
-        // Extract bullet points by splitting lines that start with "-"
-        const bullets = result
-          .split("\n")
-          .filter((line) => line.trim().startsWith("-"))
-          .map((line) => line.replace(/^-+\s*/, "")); // remove leading '-'
-
-        setPoints(bullets);
-      })
-      .catch((err) => console.error("Error parsing file:", err));
-  }, []);
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <h3>Suzuki Swift – Best Features (Customer Feedback)</h3>
-      <ul>
-        {points.map((point, i) => (
-          <li key={i} dangerouslySetInnerHTML={{ __html: point }} />
-        ))}
-      </ul>
-    </div>
-  );
+  return items;
 };
 
-export default BotResult;
+
+
+{
+  aiMessage.text.result.includes("**") ? (
+    <ul style={{ marginLeft: "20px" }}>
+      {formatMessageWithBullets(aiMessage.text.result).map((item, index) => (
+        <li key={index}>
+          <strong>{item.title}</strong> - {item.description}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p>{aiMessage.text.result}</p>
+  )
+}
+
+
+
+const formatBullets = (text) => {
+  return text
+    .replace(/\*\*/g, "")          // remove **
+    .split(". ")                   // split sentences
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    .map(line => `• ${line}`)
+    .join("\n");
+};
+
+
+<pre>{formatBullets(aiMessage.text.result)}</pre>
+
+
+const newAiMessage = { 
+  text: { result: response.result }, 
+  bullets: formatMessageWithBullets(response.result),
+  user: false 
+};
+
+
+
+"Maruti vehicles offer several features that are highlighted in user comments: **Mileage Efficiency** - Maruti is known for best-in-class mileage. **Comfort and Handling** - The Ignis and Ertiga models receive praise for their comfortable ride and handling. **Practicality** - Vehicles like the Swift and Ignis are recommended for city driving and small families due to their road presence and convenience. **Affordability and Value** - The Ignis and Baleno are highlighted as offering great value, making them attractive choices in their price segments. **Performance and Reliability** - The FRONX and other models are noted for their performance and reliability, with users experiencing minimal issues even after extensive driving. **Safety and Features** - Maruti vehicles, such as the Wagon R, are described as having good safety elements, with features like rear cameras and touchscreens enhancing the driving experience. **Spaciousness** - The Swift's boot space and Ertiga's overall roominess are well-regarded, making them practical options for families."
+
+
+
+{
+    "result": "Maruti vehicles offer several features that are highlighted in user comments: **Mileage Efficiency** - Maruti is known for best-in-class mileage. **Comfort and Handling** - The Ignis and Ertiga models receive praise for their comfortable ride and handling. **Practicality** - Vehicles like the Swift and Ignis are recommended for city driving and small families due to their road presence and convenience. **Affordability and Value** - The Ignis and Baleno are highlighted as offering great value, making them attractive choices in their price segments. **Performance and Reliability** - The FRONX and other models are noted for their performance and reliability, with users experiencing minimal issues even after extensive driving. **Safety and Features** - Maruti vehicles, such as the Wagon R, are described as having good safety elements, with features like rear cameras and touchscreens enhancing the driving experience. **Spaciousness** - The Swift's boot space and Ertiga's overall roominess are well-regarded, making them practical options for families.",
+    "citation": [
+        {
+            "Reddit": [
+                {
+                    "sentiment": "neutral",
+                    "comment_datetime": "2025-04-12 18:06:07",
+                    "comments": "Yeah I agree maruti is known for its best in class mileage but fronx also weights lessMan,you are dumb.How would you argue for extra 20ps in turbo?",
+                    "url": "https://www.reddit.com/r/CarsIndia/comments/1jxbglb/comment/mmrqbhx"
+                }
+            ]
+        },
+        {
+            "Cardekho": [
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-11 00:00:00",
+                    "comments": "Maruti Ignis: Best Car At This Range,: Best Car at this range, milega was mind blowing, Have a great road presence. Much comfortable, beautiful handling really happy with the car Great work maruti. I recommend the car to each and every person. Best car for city person, having a small family, this car provide you a wonderful moments. Really best car at this price segment.",
+                    "url": "https://www.cardekho.com/user-review/maruti-ignis/best-car-at-this-range-327428.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-11 00:00:00",
+                    "comments": "Maruti Ignis: Best Car At This Range,: Best Car at this range, milega was mind blowing, Have a great road presence. Much comfortable, beautiful handling really happy with the car Great work maruti. I recommend the car to each and every person. Best car for city person, having a small family, this car provide you a wonderful moments. Really best car at this price segment.",
+                    "url": "https://www.cardekho.com/user-review/maruti-ignis/best-car-at-this-range-327428.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-09 00:00:00",
+                    "comments": "Maruti Swift: Maruti Swift And All Vehicles Best Look: Maruti suzuki best service and comfortable seating. Boot space, and all vehicles is best I say maruti very good. And all parts available in all areas easily and i would say  buy Swift small femily.and all car interior very wonderful and rear camera and touch screen and sound etc. best",
+                    "url": "https://www.cardekho.com/user-review/maruti-swift/maruti-swift-and-all-vehicles-best-look-327398.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-08 00:00:00",
+                    "comments": "Maruti Wagon R: Excellent Performance: Vry good vry comfortable car is heavy power full looking so beautiful ??ðŸ˜ðŸ˜ suzuki company is very sefty car nice ac nice look nice light good condition have power super car nice colour very comfortable nice site nice mirror nice door. Nice tyre. Nice sterling. Good prafam. Full sefty. Wow",
+                    "url": "https://www.cardekho.com/user-review/maruti-wagon-r/excellent-performance-327375.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-11 00:00:00",
+                    "comments": "Maruti Ertiga: Best Car In Segment In All Aspects: Best Balanced Car in terms of Mileage/Performance blended with Luxury. Overall best car with no complaints. Good reliability, low maintenace, good comfort, best mileage, better resilliency makes it the Dominator in segment. Its pocket friendly and vrery one trusts it. will definitey recommend this car to every one especially its Cng Version is very beneficiary",
+                    "url": "https://www.cardekho.com/user-review/maruti-ertiga/best-car-in-segment-in-all-aspects-327440.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-13 00:00:00",
+                    "comments": "Maruti FRONX: FRONX IS THE BEST: It is the best car I have ever owned i have done 2 lakh km on this car in one year best comfort and best performance in this segment and best looks.the top speed of this car which I have done is 180 km/h and also I drive this car 2000 km straight and I have no issues with this car I drove this car for more than 2 lakh km but no problem I have faced",
+                    "url": "https://www.cardekho.com/user-review/maruti-fronx/fronx-is-the-best-327472.htm"
+                },
+                {
+                    "sentiment": "positive",
+                    "comment_datetime": "2025-05-09 00:00:00",
+                    "comments": "Maruti Baleno: It's Is A Very Good Car: Yes this is very hard and the most hardfull car and I am just love it then he is come on the road it's very good car and this is really very beautiful and a low budget car so you can you buy this car it is very very Hard drive so you can buy the car and you drive the car so you can the experience car",
+                    "url": "https://www.cardekho.com/user-review/maruti-baleno/its-is-a-very-good-car-327397.htm"
+                }
+            ]
+        },
+        {
+            "Youtube": [
+                {
+                    "sentiment": "neutral",
+                    "comment_datetime": "2025-04-06 15:42:01",
+                    "comments": "RANGE Not Showing Issue in Maruti Suzuki ",
+                    "url": "https://www.youtube.com/watch?v=6KrfUIDiyUs"
+                },
+                {
+                    "sentiment": "negative",
+                    "comment_datetime": "2025-04-06 15:48:59",
+                    "comments": "Maruti Suzuki to jindagi mein nahin kabhi lunga",
+                    "url": "https://www.youtube.com/watch?v=evmCwYIkUwc&lc=UgzhAoq5rSSMbjsyJfB4AaABAg"
+                }
+            ]
+        }
+    ]
+}
